@@ -1,5 +1,5 @@
 import { CopyIcon, DownloadIcon } from '@primer/octicons-react'
-import { Box, Button, FormControl, Heading, Stack, Text, Textarea } from '@primer/react'
+import { Box, Button, FormControl, Heading, Stack, Text, TextInput } from '@primer/react'
 import { useCallback, useMemo, useState } from 'react'
 import {
   calculateArea,
@@ -28,7 +28,7 @@ const defaultParams: SuperellipseParams = {
   padding: 0,
 }
 
-export default function SuperellipseGenerator() {
+export default function Generator() {
   const [params, setParams] = useState<SuperellipseParams>(defaultParams)
   const [svgString, setSvgString] = useState<string>('')
   const [showCode, setShowCode] = useState(false)
@@ -144,10 +144,6 @@ export default function SuperellipseGenerator() {
 
   return (
     <Box sx={{ p: 4 }}>
-      <Heading as="h2" sx={{ mb: 4 }}>
-        超椭圆生成器
-      </Heading>
-
       <Stack direction="horizontal" gap="spacious" align="start">
         {/* 左侧：参数控制 */}
         <Stack.Item grow>
@@ -360,27 +356,36 @@ export default function SuperellipseGenerator() {
               }}
             >
               {points.length > 0 && (
-                <svg
-                  width={params.svgWidth}
-                  height={params.svgHeight}
-                  viewBox={`${(bounds.minX - params.padding - 1).toFixed(2)} ${(
-                    bounds.minY
-                    - params.padding
-                    - 1
-                  ).toFixed(2)} ${(bounds.maxX - bounds.minX + params.padding * 2 + 2).toFixed(
-                    2,
-                  )} ${(bounds.maxY - bounds.minY + params.padding * 2 + 2).toFixed(2)}`}
-                  preserveAspectRatio="xMidYMid meet"
-                  style={{ border: '1px solid #d0d7de' }}
+                <Box
+                  sx={{
+                    backgroundColor: '#fff',
+                    backgroundImage:
+                      'linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%), linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%)',
+                    backgroundPosition: '0 0, 5px 5px',
+                    backgroundSize: '10px 10px',
+                  }}
                 >
-                  <path
-                    d={svgPath}
-                    fill="#f6f8fa"
-                    stroke="#0969da"
-                    strokeWidth="2"
-                    vectorEffect="non-scaling-stroke"
-                  />
-                </svg>
+                  <svg
+                    width={params.svgWidth}
+                    height={params.svgHeight}
+                    viewBox={`${(bounds.minX - params.padding - 1).toFixed(2)} ${(
+                      bounds.minY
+                      - params.padding
+                      - 1
+                    ).toFixed(2)} ${(bounds.maxX - bounds.minX + params.padding * 2 + 2).toFixed(
+                      2,
+                    )} ${(bounds.maxY - bounds.minY + params.padding * 2 + 2).toFixed(2)}`}
+                    preserveAspectRatio="xMidYMid meet"
+                  >
+                    <path
+                      d={svgPath}
+                      fill="#f6f8fa"
+                      stroke="#0969da"
+                      strokeWidth="2"
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  </svg>
+                </Box>
               )}
             </Box>
 
@@ -404,10 +409,9 @@ export default function SuperellipseGenerator() {
             {showCode && svgString && (
               <Box sx={{ mt: 3 }}>
                 <Text sx={{ fontSize: 1, fontWeight: 'bold', mb: 2 }}>SVG代码:</Text>
-                <Textarea
+                <TextInput
                   value={svgString}
                   readOnly
-                  rows={8}
                   sx={{
                     fontSize: 1,
                     fontFamily: 'mono',

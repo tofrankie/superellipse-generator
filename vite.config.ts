@@ -5,7 +5,7 @@ import { defineConfig } from 'rolldown-vite'
 export default defineConfig(({ mode }) => {
   const isProd = mode === 'production'
   return {
-    base: isProd ? '/superellipse/' : '/',
+    base: isProd ? '/superellipse-generator/' : '/',
     server: {
       port: 3000,
       open: true,
@@ -15,5 +15,10 @@ export default defineConfig(({ mode }) => {
       sourcemap: true,
     },
     plugins: [react()],
+    resolve: {
+      alias: {
+        '@': '/src',
+      },
+    },
   }
 })

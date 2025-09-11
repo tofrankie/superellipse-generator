@@ -36,6 +36,9 @@ importers:
       '@eslint-react/eslint-plugin':
         specifier: 1.53.0
         version: 1.53.0(eslint@9.35.0)(ts-api-utils@2.1.0(typescript@5.9.2))(typescript@5.9.2)
+      '@types/node':
+        specifier: 24.3.1
+        version: 24.3.1
       '@types/react':
         specifier: 19.1.12
         version: 19.1.12
@@ -44,7 +47,7 @@ importers:
         version: 19.1.9(@types/react@19.1.12)
       '@vitejs/plugin-react':
         specifier: 5.0.2
-        version: 5.0.2(vite@7.1.5(lightningcss@1.30.1)(yaml@2.8.1))
+        version: 5.0.2(vite@7.1.5(@types/node@24.3.1)(lightningcss@1.30.1)(yaml@2.8.1))
       eslint:
         specifier: 9.35.0
         version: 9.35.0
@@ -60,12 +63,9 @@ importers:
       npm-run-all2:
         specifier: 8.0.4
         version: 8.0.4
-      rolldown:
-        specifier: 1.0.0-beta.37
-        version: 1.0.0-beta.37
       rolldown-vite:
         specifier: 7.1.9
-        version: 7.1.9(esbuild@0.25.9)(yaml@2.8.1)
+        version: 7.1.9(@types/node@24.3.1)(esbuild@0.25.9)(yaml@2.8.1)
       simple-git-hooks:
         specifier: 2.13.1
         version: 2.13.1
@@ -915,6 +915,9 @@ packages:
 
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
+
+  '@types/node@24.3.1':
+    resolution: {integrity: sha512-3vXmQDXy+woz+gnrTvuvNrPzekOi+Ds0ReMxw0LzBiK3a+1k0kQn9f2NWk+lgD4rJehFUmYy2gMhJ2ZI+7YP9g==}
 
   '@types/react-dom@19.1.9':
     resolution: {integrity: sha512-qXRuZaOsAdXKFyOhRBg6Lqqc0yay13vN7KrIg4L7N4aaHN68ma9OK3NE1BoDFgFOTfM7zg+3/8+2n8rLUH3OKQ==}
@@ -2793,6 +2796,9 @@ packages:
     resolution: {integrity: sha512-nWJ91DjeOkej/TA8pXQ3myruKpKEYgqvpw9lz4OPHj/NWFNluYrjbz9j01CJ8yKQd2g4jFoOkINCTW2I5LEEyw==}
     engines: {node: '>= 0.4'}
 
+  undici-types@7.10.0:
+    resolution: {integrity: sha512-t5Fy/nfn+14LuOc2KNYg75vZqClpAiqscVvMygNnlsHBFpSXdJaYtXMcdNLpl/Qvc3P2cB3s6lOV51nqsFq4ag==}
+
   unist-util-is@6.0.0:
     resolution: {integrity: sha512-2qCTHimwdxLfz+YzdGfkqNlH0tLi9xjTnHddPmJwtIG9MGsdbutfTc4P+haPD7l7Cjxf/WZj+we5qfVPvvxfYw==}
 
@@ -3737,6 +3743,10 @@ snapshots:
 
   '@types/ms@2.1.0': {}
 
+  '@types/node@24.3.1':
+    dependencies:
+      undici-types: 7.10.0
+
   '@types/react-dom@19.1.9(@types/react@19.1.12)':
     dependencies:
       '@types/react': 19.1.12
@@ -3850,7 +3860,7 @@ snapshots:
       '@typescript-eslint/types': 8.43.0
       eslint-visitor-keys: 4.2.1
 
-  '@vitejs/plugin-react@5.0.2(vite@7.1.5(lightningcss@1.30.1)(yaml@2.8.1))':
+  '@vitejs/plugin-react@5.0.2(vite@7.1.5(@types/node@24.3.1)(lightningcss@1.30.1)(yaml@2.8.1))':
     dependencies:
       '@babel/core': 7.28.4
       '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.28.4)
@@ -3858,7 +3868,7 @@ snapshots:
       '@rolldown/pluginutils': 1.0.0-beta.34
       '@types/babel__core': 7.20.5
       react-refresh: 0.17.0
-      vite: 7.1.5(lightningcss@1.30.1)(yaml@2.8.1)
+      vite: 7.1.5(@types/node@24.3.1)(lightningcss@1.30.1)(yaml@2.8.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -5823,7 +5833,7 @@ snapshots:
 
   reusify@1.1.0: {}
 
-  rolldown-vite@7.1.9(esbuild@0.25.9)(yaml@2.8.1):
+  rolldown-vite@7.1.9(@types/node@24.3.1)(esbuild@0.25.9)(yaml@2.8.1):
     dependencies:
       fdir: 6.5.0(picomatch@4.0.3)
       lightningcss: 1.30.1
@@ -5832,6 +5842,7 @@ snapshots:
       rolldown: 1.0.0-beta.37
       tinyglobby: 0.2.15
     optionalDependencies:
+      '@types/node': 24.3.1
       esbuild: 0.25.9
       fsevents: 2.3.3
       yaml: 2.8.1
@@ -6186,6 +6197,8 @@ snapshots:
       which-boxed-primitive: 1.1.1
     optional: true
 
+  undici-types@7.10.0: {}
+
   unist-util-is@6.0.0:
     dependencies:
       '@types/unist': 3.0.3
@@ -6217,7 +6230,7 @@ snapshots:
 
   util-deprecate@1.0.2: {}
 
-  vite@7.1.5(lightningcss@1.30.1)(yaml@2.8.1):
+  vite@7.1.5(@types/node@24.3.1)(lightningcss@1.30.1)(yaml@2.8.1):
     dependencies:
       esbuild: 0.25.9
       fdir: 6.5.0(picomatch@4.0.3)
@@ -6226,6 +6239,7 @@ snapshots:
       rollup: 4.50.1
       tinyglobby: 0.2.15
     optionalDependencies:
+      '@types/node': 24.3.1
       fsevents: 2.3.3
       lightningcss: 1.30.1
       yaml: 2.8.1

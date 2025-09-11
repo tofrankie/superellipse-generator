@@ -1,5 +1,10 @@
-import SuperellipseGenerator from '../components/superellipse-generator'
+import { AppHeader, Generator } from '@/components'
 
 export default function Index() {
-  return <SuperellipseGenerator />
+  return (
+    <>
+      <AppHeader />
+      <Generator />
+    </>
+  )
 }
