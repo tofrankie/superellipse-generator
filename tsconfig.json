@@ -11,6 +11,7 @@
       "@/*": ["src/*"]
     },
     "resolveJsonModule": true,
+    "types": ["rolldown-vite/client"],
     "allowImportingTsExtensions": true,
     "strict": true,
     "noEmit": true,
