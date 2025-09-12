@@ -1,5 +1,6 @@
+import type { BackgroundType } from './background-selector'
 import { CopyIcon, DownloadIcon } from '@primer/octicons-react'
-import { Box, Button, FormControl, Heading, Stack, Text, TextInput } from '@primer/react'
+import { Box, Button, Heading, Stack, Text, TextInput } from '@primer/react'
 import { useCallback, useMemo, useState } from 'react'
 import {
   calculateArea,
@@ -7,6 +8,9 @@ import {
   getBounds,
   superellipsePoints,
 } from '../utils/superellipse'
+import BackgroundSelector from './background-selector'
+import DimensionInput from './dimension-input'
+import SliderWithInput from './slider-with-input'
 
 interface SuperellipseParams {
   a: number
@@ -15,7 +19,11 @@ interface SuperellipseParams {
   segments: number
   svgWidth: number
   svgHeight: number
-  padding: number
+}
+
+interface BackgroundSettings {
+  type: BackgroundType
+  color: string
 }
 
 const defaultParams: SuperellipseParams = {
@@ -25,11 +33,16 @@ const defaultParams: SuperellipseParams = {
   segments: 256,
   svgWidth: 300,
   svgHeight: 300,
-  padding: 0,
+}
+
+const defaultBackground: BackgroundSettings = {
+  type: 'transparent',
+  color: '#ffffff',
 }
 
 export default function Generator() {
   const [params, setParams] = useState<SuperellipseParams>(defaultParams)
+  const [background, setBackground] = useState<BackgroundSettings>(defaultBackground)
   const [svgString, setSvgString] = useState<string>('')
   const [showCode, setShowCode] = useState(false)
 
@@ -73,6 +86,14 @@ export default function Generator() {
     setParams(prev => ({ ...prev, [key]: value }))
   }, [])
 
+  const updateDimensions = useCallback((width: number, height: number) => {
+    setParams(prev => ({ ...prev, svgWidth: width, svgHeight: height }))
+  }, [])
+
+  const updateBackground = useCallback((type: BackgroundType, color: string) => {
+    setBackground({ type, color })
+  }, [])
+
   const generateSVG = useCallback(() => {
     try {
       const svg = generateSuperellipseSVG({
@@ -85,7 +106,7 @@ export default function Generator() {
         fill: '#f6f8fa',
         widthPx: params.svgWidth,
         heightPx: params.svgHeight,
-        padding: params.padding,
+        padding: 0, // 移除边距，使 path 贴近四周
       })
       setSvgString(svg)
       setShowCode(true)
@@ -161,125 +182,56 @@ export default function Generator() {
             </Heading>
 
             <Stack gap="normal">
-              <FormControl>
-                <FormControl.Label>
-                  半长轴 a:
-                  {params.a}
-                </FormControl.Label>
-                <input
-                  type="range"
-                  value={params.a}
-                  onChange={e => updateParam('a', Number(e.target.value))}
-                  min={10}
-                  max={200}
-                  step={1}
-                  style={{ width: '100%' }}
-                />
-              </FormControl>
+              <DimensionInput
+                label="半轴尺寸"
+                width={params.a}
+                height={params.b}
+                min={10}
+                max={200}
+                onChange={(width, height) => {
+                  updateParam('a', width)
+                  updateParam('b', height)
+                }}
+              />
 
-              <FormControl>
-                <FormControl.Label>
-                  半短轴 b:
-                  {params.b}
-                </FormControl.Label>
-                <input
-                  type="range"
-                  value={params.b}
-                  onChange={e => updateParam('b', Number(e.target.value))}
-                  min={10}
-                  max={200}
-                  step={1}
-                  style={{ width: '100%' }}
-                />
-              </FormControl>
+              <SliderWithInput
+                label="形状参数 n"
+                value={params.n}
+                min={0.1}
+                max={10}
+                step={0.1}
+                onChange={value => updateParam('n', value)}
+                precision={2}
+              />
+              <Text sx={{ fontSize: 1, color: 'fg.muted', mt: -2 }}>
+                形状:
+                {' '}
+                {getShapeDescription(params.n)}
+              </Text>
 
-              <FormControl>
-                <FormControl.Label>
-                  形状参数 n:
-                  {params.n.toFixed(2)}
-                </FormControl.Label>
-                <input
-                  type="range"
-                  value={params.n}
-                  onChange={e => updateParam('n', Number(e.target.value))}
-                  min={0.1}
-                  max={10}
-                  step={0.1}
-                  style={{ width: '100%' }}
-                />
-                <Text sx={{ fontSize: 1, color: 'fg.muted' }}>
-                  形状:
-                  {' '}
-                  {getShapeDescription(params.n)}
-                </Text>
-              </FormControl>
+              <SliderWithInput
+                label="采样点数"
+                value={params.segments}
+                min={32}
+                max={1024}
+                step={32}
+                onChange={value => updateParam('segments', value)}
+              />
 
-              <FormControl>
-                <FormControl.Label>
-                  采样点数:
-                  {params.segments}
-                </FormControl.Label>
-                <input
-                  type="range"
-                  value={params.segments}
-                  onChange={e => updateParam('segments', Number(e.target.value))}
-                  min={32}
-                  max={1024}
-                  step={32}
-                  style={{ width: '100%' }}
-                />
-              </FormControl>
+              <DimensionInput
+                label="SVG 尺寸 (px)"
+                width={params.svgWidth}
+                height={params.svgHeight}
+                min={100}
+                max={800}
+                onChange={updateDimensions}
+              />
 
-              <FormControl>
-                <FormControl.Label>
-                  SVG 宽度:
-                  {params.svgWidth}
-                  px
-                </FormControl.Label>
-                <input
-                  type="range"
-                  value={params.svgWidth}
-                  onChange={e => updateParam('svgWidth', Number(e.target.value))}
-                  min={100}
-                  max={800}
-                  step={10}
-                  style={{ width: '100%' }}
-                />
-              </FormControl>
-
-              <FormControl>
-                <FormControl.Label>
-                  SVG 高度:
-                  {params.svgHeight}
-                  px
-                </FormControl.Label>
-                <input
-                  type="range"
-                  value={params.svgHeight}
-                  onChange={e => updateParam('svgHeight', Number(e.target.value))}
-                  min={100}
-                  max={800}
-                  step={10}
-                  style={{ width: '100%' }}
-                />
-              </FormControl>
-
-              <FormControl>
-                <FormControl.Label>
-                  边距:
-                  {params.padding}
-                  px
-                </FormControl.Label>
-                <input
-                  type="range"
-                  value={params.padding}
-                  onChange={e => updateParam('padding', Number(e.target.value))}
-                  min={0}
-                  max={50}
-                  step={1}
-                  style={{ width: '100%' }}
-                />
-              </FormControl>
+              <BackgroundSelector
+                backgroundType={background.type}
+                backgroundColor={background.color}
+                onChange={updateBackground}
+              />
             </Stack>
 
             <Box sx={{ mt: 4, p: 3, bg: 'canvas.subtle', borderRadius: 2 }}>
@@ -305,12 +257,13 @@ export default function Generator() {
                   ×
                   {' '}
                   {params.svgHeight}
+                  {' '}
                   px
                 </Text>
                 <Text sx={{ fontSize: 1 }}>
-                  边距:
-                  {params.padding}
-                  px
+                  背景:
+                  {' '}
+                  {background.type === 'transparent' ? '透明' : background.color}
                 </Text>
                 <Text sx={{ fontSize: 1, color: 'fg.muted' }}>
                   边界: [
@@ -358,23 +311,24 @@ export default function Generator() {
               {points.length > 0 && (
                 <Box
                   sx={{
-                    backgroundColor: '#fff',
+                    backgroundColor:
+                      background.type === 'transparent' ? 'transparent' : background.color,
                     backgroundImage:
-                      'linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%), linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%)',
+                      background.type === 'transparent'
+                        ? 'linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%), linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%)'
+                        : 'none',
                     backgroundPosition: '0 0, 5px 5px',
                     backgroundSize: '10px 10px',
+                    border: background.type === 'transparent' ? '1px solid #d0d7de' : 'none',
+                    borderRadius: '6px',
                   }}
                 >
                   <svg
                     width={params.svgWidth}
                     height={params.svgHeight}
-                    viewBox={`${(bounds.minX - params.padding - 1).toFixed(2)} ${(
-                      bounds.minY
-                      - params.padding
-                      - 1
-                    ).toFixed(2)} ${(bounds.maxX - bounds.minX + params.padding * 2 + 2).toFixed(
-                      2,
-                    )} ${(bounds.maxY - bounds.minY + params.padding * 2 + 2).toFixed(2)}`}
+                    viewBox={`${bounds.minX.toFixed(2)} ${bounds.minY.toFixed(2)} ${(
+                      bounds.maxX - bounds.minX
+                    ).toFixed(2)} ${(bounds.maxY - bounds.minY).toFixed(2)}`}
                     preserveAspectRatio="xMidYMid meet"
                   >
                     <path
