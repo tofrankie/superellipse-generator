@@ -1,5 +1,5 @@
 export { default as AppHeader } from './app-header'
-export { default as BackgroundSelector } from './background-selector'
 export { default as DimensionInput } from './dimension-input'
 export { default as Generator } from './generator'
 export { default as SliderWithInput } from './slider-with-input'
+export { default as StyleControl } from './style-control'

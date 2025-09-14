@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "lint": "eslint . --fix --cache",
     "type-check": "tsc --noEmit",
-    "check": "run-s type-check lint",
+    "check": "run-p type-check lint",
     "prepare": "simple-git-hooks"
   },
   "dependencies": {

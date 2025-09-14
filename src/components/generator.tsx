@@ -1,16 +1,10 @@
-import type { BackgroundType } from './background-selector'
 import { CopyIcon, DownloadIcon } from '@primer/octicons-react'
 import { Box, Button, Heading, Stack, Text, TextInput } from '@primer/react'
 import { useCallback, useMemo, useState } from 'react'
-import {
-  calculateArea,
-  generateSuperellipseSVG,
-  getBounds,
-  superellipsePoints,
-} from '../utils/superellipse'
-import BackgroundSelector from './background-selector'
+import { generateSuperellipseSVG, getBounds, superellipsePoints } from '../utils/superellipse'
 import DimensionInput from './dimension-input'
 import SliderWithInput from './slider-with-input'
+import StyleControl from './style-control'
 
 interface SuperellipseParams {
   a: number
@@ -22,8 +16,16 @@ interface SuperellipseParams {
 }
 
 interface BackgroundSettings {
-  type: BackgroundType
+  type: 'transparent' | 'color'
   color: string
+}
+
+interface StyleSettings {
+  fillEnabled: boolean
+  fillColor: string
+  strokeEnabled: boolean
+  strokeColor: string
+  strokeWidth: number
 }
 
 const defaultParams: SuperellipseParams = {
@@ -37,14 +39,28 @@ const defaultParams: SuperellipseParams = {
 
 const defaultBackground: BackgroundSettings = {
   type: 'transparent',
-  color: '#ffffff',
+  color: '#ffffff', // 默认白色背景
+}
+
+const defaultStyle: StyleSettings = {
+  fillEnabled: true,
+  fillColor: '#f6f8fa', // 默认浅灰色填充
+  strokeEnabled: true,
+  strokeColor: '#0969da', // 默认蓝色描边
+  strokeWidth: 2,
 }
 
 export default function Generator() {
   const [params, setParams] = useState<SuperellipseParams>(defaultParams)
   const [background, setBackground] = useState<BackgroundSettings>(defaultBackground)
+  const [style, setStyle] = useState<StyleSettings>(defaultStyle)
   const [svgString, setSvgString] = useState<string>('')
   const [showCode, setShowCode] = useState(false)
+
+  // 颜色选择器状态
+  const [showBackgroundColorPicker, setShowBackgroundColorPicker] = useState(false)
+  const [showFillColorPicker, setShowFillColorPicker] = useState(false)
+  const [showStrokeColorPicker, setShowStrokeColorPicker] = useState(false)
 
   const points = useMemo(() => {
     try {
@@ -56,14 +72,13 @@ export default function Generator() {
     }
   }, [params.a, params.b, params.n, params.segments])
 
-  const { area, bounds } = useMemo(() => {
+  const { bounds } = useMemo(() => {
     try {
-      const area = calculateArea(params.a, params.b, params.n)
       const bounds = getBounds(params.a, params.b, params.n)
-      return { area, bounds }
+      return { bounds }
     }
     catch {
-      return { area: 0, bounds: { minX: 0, maxX: 0, minY: 0, maxY: 0 } }
+      return { bounds: { minX: 0, maxX: 0, minY: 0, maxY: 0 } }
     }
   }, [params.a, params.b, params.n])
 
@@ -90,9 +105,49 @@ export default function Generator() {
     setParams(prev => ({ ...prev, svgWidth: width, svgHeight: height }))
   }, [])
 
-  const updateBackground = useCallback((type: BackgroundType, color: string) => {
-    setBackground({ type, color })
-  }, [])
+  // 背景相关回调
+  const handleBackgroundToggle = useCallback(() => {
+    const newType = background.type === 'transparent' ? 'color' : 'transparent'
+    setBackground({ ...background, type: newType })
+  }, [background])
+
+  const handleBackgroundColorChange = useCallback(
+    (color: string) => {
+      setBackground({ ...background, color })
+    },
+    [background],
+  )
+
+  // 填充相关回调
+  const handleFillToggle = useCallback(() => {
+    setStyle({ ...style, fillEnabled: !style.fillEnabled })
+  }, [style])
+
+  const handleFillColorChange = useCallback(
+    (color: string) => {
+      setStyle({ ...style, fillColor: color })
+    },
+    [style],
+  )
+
+  // 描边相关回调
+  const handleStrokeToggle = useCallback(() => {
+    setStyle({ ...style, strokeEnabled: !style.strokeEnabled })
+  }, [style])
+
+  const handleStrokeColorChange = useCallback(
+    (color: string) => {
+      setStyle({ ...style, strokeColor: color })
+    },
+    [style],
+  )
+
+  const handleStrokeWidthChange = useCallback(
+    (width: number) => {
+      setStyle({ ...style, strokeWidth: width })
+    },
+    [style],
+  )
 
   const generateSVG = useCallback(() => {
     try {
@@ -101,9 +156,9 @@ export default function Generator() {
         b: params.b,
         n: params.n,
         segments: params.segments,
-        stroke: '#0969da',
-        strokeWidth: 2,
-        fill: '#f6f8fa',
+        stroke: style.strokeEnabled ? style.strokeColor : 'none',
+        strokeWidth: style.strokeEnabled ? style.strokeWidth : 0,
+        fill: style.fillEnabled ? style.fillColor : 'none',
         widthPx: params.svgWidth,
         heightPx: params.svgHeight,
         padding: 0, // 移除边距，使 path 贴近四周
@@ -114,7 +169,7 @@ export default function Generator() {
     catch (error) {
       console.error('生成SVG时出错:', error)
     }
-  }, [params])
+  }, [params, style])
 
   const downloadSVG = useCallback(() => {
     if (!svgString)
@@ -145,24 +200,6 @@ export default function Generator() {
     }
   }, [svgString])
 
-  const getShapeDescription = (n: number) => {
-    if (n < 0.5)
-      return '尖锐星形'
-    if (n < 1)
-      return '尖锐菱形'
-    if (n < 1.5)
-      return '圆角菱形'
-    if (n < 2)
-      return '圆角方形'
-    if (n === 2)
-      return '椭圆'
-    if (n < 3)
-      return '圆角矩形'
-    if (n < 5)
-      return '接近矩形'
-    return '矩形'
-  }
-
   return (
     <Box sx={{ p: 4 }}>
       <Stack direction="horizontal" gap="spacious" align="start">
@@ -183,11 +220,16 @@ export default function Generator() {
 
             <Stack gap="normal">
               <DimensionInput
+                label="SVG 尺寸"
+                width={params.svgWidth}
+                height={params.svgHeight}
+                onChange={updateDimensions}
+              />
+
+              <DimensionInput
                 label="半轴尺寸"
                 width={params.a}
                 height={params.b}
-                min={10}
-                max={200}
                 onChange={(width, height) => {
                   updateParam('a', width)
                   updateParam('b', height)
@@ -203,11 +245,6 @@ export default function Generator() {
                 onChange={value => updateParam('n', value)}
                 precision={2}
               />
-              <Text sx={{ fontSize: 1, color: 'fg.muted', mt: -2 }}>
-                形状:
-                {' '}
-                {getShapeDescription(params.n)}
-              </Text>
 
               <SliderWithInput
                 label="采样点数"
@@ -218,67 +255,42 @@ export default function Generator() {
                 onChange={value => updateParam('segments', value)}
               />
 
-              <DimensionInput
-                label="SVG 尺寸 (px)"
-                width={params.svgWidth}
-                height={params.svgHeight}
-                min={100}
-                max={800}
-                onChange={updateDimensions}
+              <StyleControl
+                label="背景"
+                enabled={background.type === 'color'}
+                onToggle={handleBackgroundToggle}
+                color={background.color}
+                onColorChange={handleBackgroundColorChange}
+                showColorPicker={showBackgroundColorPicker}
+                onShowColorPickerChange={setShowBackgroundColorPicker}
               />
 
-              <BackgroundSelector
-                backgroundType={background.type}
-                backgroundColor={background.color}
-                onChange={updateBackground}
+              <StyleControl
+                label="填充"
+                enabled={style.fillEnabled}
+                onToggle={handleFillToggle}
+                color={style.fillColor}
+                onColorChange={handleFillColorChange}
+                showColorPicker={showFillColorPicker}
+                onShowColorPickerChange={setShowFillColorPicker}
+              />
+
+              <StyleControl
+                label="描边"
+                enabled={style.strokeEnabled}
+                onToggle={handleStrokeToggle}
+                color={style.strokeColor}
+                onColorChange={handleStrokeColorChange}
+                showColorPicker={showStrokeColorPicker}
+                onShowColorPickerChange={setShowStrokeColorPicker}
+                width={style.strokeWidth}
+                onWidthChange={handleStrokeWidthChange}
+                widthMin={0}
+                widthMax={20}
+                widthStep={0.5}
+                widthUnit="px"
               />
             </Stack>
-
-            <Box sx={{ mt: 4, p: 3, bg: 'canvas.subtle', borderRadius: 2 }}>
-              <Stack gap="condensed">
-                <Text sx={{ fontSize: 1, fontWeight: 'bold' }}>属性信息</Text>
-                <Text sx={{ fontSize: 1 }}>
-                  面积:
-                  {area.toFixed(2)}
-                </Text>
-                <Text sx={{ fontSize: 1 }}>
-                  形状宽度:
-                  {(bounds.maxX - bounds.minX).toFixed(2)}
-                </Text>
-                <Text sx={{ fontSize: 1 }}>
-                  形状高度:
-                  {(bounds.maxY - bounds.minY).toFixed(2)}
-                </Text>
-                <Text sx={{ fontSize: 1 }}>
-                  SVG大小:
-                  {' '}
-                  {params.svgWidth}
-                  {' '}
-                  ×
-                  {' '}
-                  {params.svgHeight}
-                  {' '}
-                  px
-                </Text>
-                <Text sx={{ fontSize: 1 }}>
-                  背景:
-                  {' '}
-                  {background.type === 'transparent' ? '透明' : background.color}
-                </Text>
-                <Text sx={{ fontSize: 1, color: 'fg.muted' }}>
-                  边界: [
-                  {bounds.minX.toFixed(2)}
-                  ,
-                  {' '}
-                  {bounds.maxX.toFixed(2)}
-                  ] × [
-                  {bounds.minY.toFixed(2)}
-                  ,
-                  {bounds.maxY.toFixed(2)}
-                  ]
-                </Text>
-              </Stack>
-            </Box>
           </Box>
         </Stack.Item>
 
@@ -333,9 +345,9 @@ export default function Generator() {
                   >
                     <path
                       d={svgPath}
-                      fill="#f6f8fa"
-                      stroke="#0969da"
-                      strokeWidth="2"
+                      fill={style.fillEnabled ? style.fillColor : 'none'}
+                      stroke={style.strokeEnabled ? style.strokeColor : 'none'}
+                      strokeWidth={style.strokeEnabled ? style.strokeWidth : 0}
                       vectorEffect="non-scaling-stroke"
                     />
                   </svg>
