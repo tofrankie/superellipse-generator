@@ -1,5 +1,5 @@
 import { LockIcon, UnlockIcon } from '@primer/octicons-react'
-import { Box, Button, FormControl, TextInput } from '@primer/react'
+import { Box, FormControl, IconButton, TextInput } from '@primer/react'
 import { useCallback, useMemo, useRef, useState } from 'react'
 
 interface DimensionInputProps {
@@ -53,11 +53,12 @@ export default function DimensionInput({ label, width, height, onChange }: Dimen
         const newHeight = Math.round(newWidth / lockedAspectRatioRef.current)
         onChange(newWidth, newHeight)
         setHeightInput(newHeight.toString())
-      } else {
+      }
+      else {
         onChange(newWidth, height)
       }
     },
-    [aspectRatioLocked, height, onChange]
+    [aspectRatioLocked, height, onChange],
   )
 
   const handleHeightChange = useCallback(
@@ -66,17 +67,19 @@ export default function DimensionInput({ label, width, height, onChange }: Dimen
         const newWidth = Math.round(newHeight * lockedAspectRatioRef.current)
         onChange(newWidth, newHeight)
         setWidthInput(newWidth.toString())
-      } else {
+      }
+      else {
         onChange(width, newHeight)
       }
     },
-    [aspectRatioLocked, width, onChange]
+    [aspectRatioLocked, width, onChange],
   )
 
   const handleInputFocus = useCallback((type: 'width' | 'height') => {
     if (type === 'width') {
       isWidthEditingRef.current = true
-    } else {
+    }
+    else {
       isHeightEditingRef.current = true
     }
   }, [])
@@ -85,7 +88,8 @@ export default function DimensionInput({ label, width, height, onChange }: Dimen
     (type: 'width' | 'height', value: string) => {
       if (type === 'width') {
         setWidthInput(value)
-      } else {
+      }
+      else {
         setHeightInput(value)
       }
 
@@ -93,37 +97,43 @@ export default function DimensionInput({ label, width, height, onChange }: Dimen
         if (aspectRatioLocked) {
           if (type === 'width') {
             setHeightInput('')
-          } else {
+          }
+          else {
             setWidthInput('')
           }
           lockedAspectRatioRef.current = 1
-        } else {
+        }
+        else {
           const defaultValue = 1
           if (type === 'width') {
             handleWidthChange(defaultValue)
-          } else {
+          }
+          else {
             handleHeightChange(defaultValue)
           }
         }
-      } else {
+      }
+      else {
         const numValue = Number(value)
         if (!Number.isNaN(numValue) && numValue > 0) {
           if (type === 'width') {
             handleWidthChange(numValue)
-          } else {
+          }
+          else {
             handleHeightChange(numValue)
           }
         }
       }
     },
-    [aspectRatioLocked, handleWidthChange, handleHeightChange]
+    [aspectRatioLocked, handleWidthChange, handleHeightChange],
   )
 
   const handleInputBlur = useCallback(
     (type: 'width' | 'height', value: string) => {
       if (type === 'width') {
         isWidthEditingRef.current = false
-      } else {
+      }
+      else {
         isHeightEditingRef.current = false
       }
 
@@ -136,17 +146,21 @@ export default function DimensionInput({ label, width, height, onChange }: Dimen
             const defaultValue = 1
             handleWidthChange(defaultValue)
             handleHeightChange(defaultValue)
-          } else {
+          }
+          else {
             if (type === 'width') {
               setWidthInput(width.toString())
-            } else {
+            }
+            else {
               setHeightInput(height.toString())
             }
           }
-        } else {
+        }
+        else {
           if (type === 'width') {
             setWidthInput(width.toString())
-          } else {
+          }
+          else {
             setHeightInput(height.toString())
           }
         }
@@ -160,7 +174,7 @@ export default function DimensionInput({ label, width, height, onChange }: Dimen
       heightInput,
       handleWidthChange,
       handleHeightChange,
-    ]
+    ],
   )
 
   return (
@@ -183,7 +197,9 @@ export default function DimensionInput({ label, width, height, onChange }: Dimen
           </Box>
         </Box>
 
-        <Button
+        <IconButton
+          icon={aspectRatioLocked ? LockIcon : UnlockIcon}
+          aria-label={aspectRatioLocked ? '解锁宽高比例' : '锁定宽高比例'}
           variant="invisible"
           size="small"
           onClick={() => {
@@ -194,19 +210,10 @@ export default function DimensionInput({ label, width, height, onChange }: Dimen
             }
           }}
           sx={{
-            width: '24px',
-            height: '24px',
-            p: 0,
-            minWidth: '24px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 1,
+            flexShrink: 0,
+            color: 'fg.muted',
           }}
-          title={aspectRatioLocked ? '解锁宽高比例' : '锁定宽高比例'}
-        >
-          {aspectRatioLocked ? <LockIcon size={16} /> : <UnlockIcon size={16} />}
-        </Button>
+        />
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <TextInput

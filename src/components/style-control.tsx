@@ -1,5 +1,6 @@
-import { Box, Button, Checkbox, FormControl, Stack, TextInput } from '@primer/react'
+import { Box, Button, Stack, TextInput } from '@primer/react'
 import { useCallback } from 'react'
+import Switch from '@/components/switch'
 
 interface StyleControlProps {
   label: string
@@ -51,20 +52,15 @@ export default function StyleControl({
   }, [showColorPicker, onShowColorPickerChange])
 
   return (
-    <FormControl>
-      <FormControl.Label>{label}</FormControl.Label>
-      <Stack direction="horizontal" gap="normal" align="center">
-        <Stack.Item>
-          <Stack direction="horizontal" gap="condensed" align="center">
-            <Checkbox checked={enabled} onChange={onToggle} />
-            <Box sx={{ fontSize: 1, color: 'fg.muted' }}>
-              {enabled ? `启用${label}` : `禁用${label}`}
-            </Box>
-          </Stack>
-        </Stack.Item>
+    <Box>
+      <Stack direction="horizontal" gap="condensed" align="center" sx={{ mb: enabled ? 2 : 0 }}>
+        <Box sx={{ fontSize: 1, fontWeight: 'bold', flexGrow: 1 }}>{label}</Box>
+        <Switch checked={enabled} onChange={onToggle} ariaLabelledBy={`${label}-switch`} />
+      </Stack>
 
-        {enabled && (
-          <>
+      {enabled && (
+        <Stack gap="normal" sx={{ pl: 0 }}>
+          <Stack direction="horizontal" gap="normal" align="center">
             {color && onColorChange && (
               <Stack direction="horizontal" gap="condensed" align="center">
                 <TextInput
@@ -89,8 +85,10 @@ export default function StyleControl({
                       'border': '1px solid',
                       'borderRadius': '50%',
                       'borderColor': 'border.default',
+                      'boxShadow': 'shadow.small',
                       '&:hover': {
                         background: color,
+                        borderColor: 'border.dull',
                       },
                     }}
                   />
@@ -135,9 +133,9 @@ export default function StyleControl({
                 <Box sx={{ fontSize: 1, color: 'fg.muted' }}>{widthUnit}</Box>
               </Stack>
             )}
-          </>
-        )}
-      </Stack>
-    </FormControl>
+          </Stack>
+        </Stack>
+      )}
+    </Box>
   )
 }
